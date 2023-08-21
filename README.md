@@ -1,258 +1,145 @@
-Contribution: 2017-10-30 10:00
+# WordPress Heroku
+
+This project is a template for installing and running [WordPress](http://wordpress.org/) on [Heroku](http://www.heroku.com/). The repository comes bundled with:
+* [PostgreSQL for WordPress](http://wordpress.org/extend/plugins/postgresql-for-wordpress/)
+* [Amazon S3 and Cloudfront](https://wordpress.org/plugins/amazon-s3-and-cloudfront/)
+* [WP Sendgrid](https://wordpress.org/plugins/wp-sendgrid/)
+* [Wordpress HTTPS](https://wordpress.org/plugins/wordpress-https/)
 
-Contribution: 2017-10-30 10:01
+## Installation
 
-Contribution: 2017-10-30 10:02
+Clone the repository from Github
 
-Contribution: 2017-10-30 10:03
+    $ git clone git://github.com/mhoofman/wordpress-heroku.git
 
-Contribution: 2017-10-30 10:04
+With the [Heroku gem](http://devcenter.heroku.com/articles/heroku-command), create your app
 
-Contribution: 2017-10-30 10:05
+    $ cd wordpress-heroku
+    $ heroku create
+    Creating strange-turtle-1234... done, stack is cedar
+    http://strange-turtle-1234.herokuapp.com/ | git@heroku.com:strange-turtle-1234.git
+    Git remote heroku added
 
-Contribution: 2017-10-30 10:06
+Add a database to your app
 
-Contribution: 2017-10-30 10:07
+    $ heroku addons:create heroku-postgresql
+    Creating HEROKU_POSTGRESQL_INSTANCE... done, (free)
+    Adding HEROKU_POSTGRESQL_INSTANCE to strange-turtle-1234... done
+    Setting DATABASE_URL and restarting strange-turtle-1234... done, v3
+    Database has been created and is available
+     ! This database is empty. If upgrading, you can transfer
+     ! data from another database with pgbackups:restore
+    Use `heroku addons:docs heroku-postgresql` to view documentation.
 
-Contribution: 2017-10-30 10:08
+Promote the database (replace HEROKU_POSTGRESQL_INSTANCE with the name from the above output)
 
-Contribution: 2017-10-30 10:09
+    $ heroku pg:promote HEROKU_POSTGRESQL_INSTANCE
+    Promoting HEROKU_POSTGRESQL_INSTANCE to DATABASE_URL... done
+    Ensuring an alternate alias for existing DATABASE... done, HEROKU_POSTGRESQL_COLOR
+    Promoting HEROKU_POSTGRESQL_INSTANCE to DATABASE_URL on strange-turtle-1234... done
 
-Contribution: 2017-10-30 10:10
+Add the ability to send email (i.e. Password Resets etc)
 
-Contribution: 2017-10-30 10:11
+    $ heroku addons:create sendgrid:starter
+    Creating SENDGRID_INSTANCE... done, (free)
+    Adding SENDGRID_INSTANCE to strange-turtle-1234... done
+    Setting SENDGRID_PASSWORD, SENDGRID_USERNAME and restarting strange-turtle-1234... done, v7
+    Use `heroku addons:docs sendgrid` to view documentation.
 
-Contribution: 2017-11-07 10:00
+Create a new branch for any configuration/setup changes needed
 
-Contribution: 2017-11-07 10:01
+    $ git checkout -b production
 
-Contribution: 2017-11-07 10:02
+Store unique keys and salts in Heroku environment variables. Wordpress can provide random values [here](https://api.wordpress.org/secret-key/1.1/salt/).
 
-Contribution: 2017-11-07 10:03
+    heroku config:set AUTH_KEY='put your unique phrase here' \
+      SECURE_AUTH_KEY='put your unique phrase here' \
+      LOGGED_IN_KEY='put your unique phrase here' \
+      NONCE_KEY='put your unique phrase here' \
+      AUTH_SALT='put your unique phrase here' \
+      SECURE_AUTH_SALT='put your unique phrase here' \
+      LOGGED_IN_SALT='put your unique phrase here' \
+      NONCE_SALT='put your unique phrase here'
 
-Contribution: 2017-11-07 10:04
+Deploy to Heroku
 
-Contribution: 2017-11-15 10:00
+    $ git push heroku production:master
+    -----> Deleting 0 files matching .slugignore patterns.
+    -----> PHP app detected
 
-Contribution: 2017-11-15 10:01
+     !     WARNING: No composer.json found.
+           Using index.php to declare PHP applications is considered legacy
+           functionality and may lead to unexpected behavior.
 
-Contribution: 2017-11-17 10:00
+    -----> No runtime requirements in composer.json, defaulting to PHP 5.6.2.
+    -----> Installing system packages...
+           - PHP 5.6.2
+           - Apache 2.4.10
+           - Nginx 1.6.0
+    -----> Installing PHP extensions...
+           - zend-opcache (automatic; bundled, using 'ext-zend-opcache.ini')
+    -----> Installing dependencies...
+           Composer version 1.0-dev (ffffab37a294f3383c812d0329623f0a4ba45387) 2014-11-05 06:04:18
+           Loading composer repositories with package information
+           Installing dependencies
+           Nothing to install or update
+           Generating optimized autoload files
+    -----> Preparing runtime environment...
+           NOTICE: No Procfile, defaulting to 'web: vendor/bin/heroku-php-apache2'
+    -----> Discovering process types
+           Procfile declares types -> web
 
-Contribution: 2017-11-17 10:01
+    -----> Compressing... done, 78.5MB
+    -----> Launcing... done, v5
+           http://strange-turtle-1234.herokuapp.com deployed to Heroku
 
-Contribution: 2017-11-17 10:02
+    To git@heroku:strange-turtle-1234.git
+      * [new branch]    production -> master
 
-Contribution: 2017-11-17 10:03
+After deployment WordPress has a few more steps to setup and thats it!
 
-Contribution: 2017-11-17 10:04
+## Usage
 
-Contribution: 2017-11-17 10:05
+Because a file cannot be written to Heroku's file system, updating and installing plugins or themes should be done locally and then pushed to Heroku.
 
-Contribution: 2017-11-20 10:00
+## Updating
 
-Contribution: 2017-11-20 10:01
+Updating your WordPress version is just a matter of merging the updates into
+the branch created from the installation.
 
-Contribution: 2017-11-20 10:02
+    $ git pull # Get the latest
 
-Contribution: 2017-11-20 10:03
+Using the same branch name from our installation:
 
-Contribution: 2017-11-20 10:04
+    $ git checkout production
+    $ git merge master # Merge latest
+    $ git push heroku production:master
 
-Contribution: 2017-11-20 10:05
+WordPress needs to update the database. After push, navigate to:
 
-Contribution: 2017-11-20 10:06
+    http://your-app-url.herokuapp.com/wp-admin
 
-Contribution: 2017-11-27 10:00
+WordPress will prompt for updating the database. After that you'll be good
+to go.
 
-Contribution: 2017-11-27 10:01
+## Deployment optimisation
 
-Contribution: 2017-11-27 10:02
+If you have files that you want tracked in your repo, but do not need deploying (for example, *.md, *.pdf, *.zip). Then add path or linux file match to the `.slugignore` file & these will not be deployed.
 
-Contribution: 2017-11-27 10:03
+Examples:
+```
+path/to/ignore/
+bin/
+*.md
+*.pdf
+*.zip
+```
 
-Contribution: 2017-11-27 10:04
+## Wiki
 
-Contribution: 2017-11-27 10:05
-
-Contribution: 2017-11-28 10:00
-
-Contribution: 2017-11-28 10:01
-
-Contribution: 2017-11-28 10:02
-
-Contribution: 2017-11-28 10:03
-
-Contribution: 2017-11-28 10:04
-
-Contribution: 2017-11-30 10:00
-
-Contribution: 2017-11-30 10:01
-
-Contribution: 2017-11-30 10:02
-
-Contribution: 2017-11-30 10:03
-
-Contribution: 2017-11-30 10:04
-
-Contribution: 2017-12-05 10:00
-
-Contribution: 2017-12-11 10:00
-
-Contribution: 2017-12-11 10:01
-
-Contribution: 2017-12-11 10:02
-
-Contribution: 2017-12-11 10:03
-
-Contribution: 2017-12-15 10:00
-
-Contribution: 2017-12-15 10:01
-
-Contribution: 2017-12-15 10:02
-
-Contribution: 2017-12-15 10:03
-
-Contribution: 2017-12-15 10:04
-
-Contribution: 2017-12-15 10:05
-
-Contribution: 2017-12-15 10:06
-
-Contribution: 2017-12-15 10:07
-
-Contribution: 2017-12-18 10:00
-
-Contribution: 2017-12-18 10:01
-
-Contribution: 2017-12-18 10:02
-
-Contribution: 2017-12-18 10:03
-
-Contribution: 2017-12-18 10:04
-
-Contribution: 2017-12-18 10:05
-
-Contribution: 2017-12-18 10:06
-
-Contribution: 2017-12-18 10:07
-
-Contribution: 2017-12-18 10:08
-
-Contribution: 2017-12-18 10:09
-
-Contribution: 2017-12-18 10:10
-
-Contribution: 2017-12-19 10:00
-
-Contribution: 2017-12-19 10:01
-
-Contribution: 2017-12-19 10:02
-
-Contribution: 2017-12-28 10:00
-
-Contribution: 2017-12-28 10:01
-
-Contribution: 2017-12-28 10:02
-
-Contribution: 2018-01-01 10:00
-
-Contribution: 2018-01-01 10:01
-
-Contribution: 2018-01-01 10:02
-
-Contribution: 2018-01-01 10:03
-
-Contribution: 2018-01-01 10:04
-
-Contribution: 2018-01-01 10:05
-
-Contribution: 2018-01-01 10:06
-
-Contribution: 2018-01-01 10:07
-
-Contribution: 2018-01-01 10:08
-
-Contribution: 2018-01-01 10:09
-
-Contribution: 2018-01-01 10:10
-
-Contribution: 2018-01-02 10:00
-
-Contribution: 2018-01-02 10:01
-
-Contribution: 2018-01-02 10:02
-
-Contribution: 2018-01-02 10:03
-
-Contribution: 2018-01-02 10:04
-
-Contribution: 2018-01-02 10:05
-
-Contribution: 2018-01-02 10:06
-
-Contribution: 2018-01-08 10:00
-
-Contribution: 2018-01-08 10:01
-
-Contribution: 2018-01-08 10:02
-
-Contribution: 2018-01-08 10:03
-
-Contribution: 2018-01-08 10:04
-
-Contribution: 2018-01-08 10:05
-
-Contribution: 2018-01-08 10:06
-
-Contribution: 2018-01-08 10:07
-
-Contribution: 2018-01-08 10:08
-
-Contribution: 2018-01-08 10:09
-
-Contribution: 2018-01-08 10:10
-
-Contribution: 2018-01-08 10:11
-
-Contribution: 2018-01-10 10:00
-
-Contribution: 2018-01-10 10:01
-
-Contribution: 2018-01-10 10:02
-
-Contribution: 2018-01-10 10:03
-
-Contribution: 2018-01-10 10:04
-
-Contribution: 2018-01-10 10:05
-
-Contribution: 2018-01-10 10:06
-
-Contribution: 2018-01-10 10:07
-
-Contribution: 2018-01-10 10:08
-
-Contribution: 2018-01-12 10:00
-
-Contribution: 2018-01-22 10:00
-
-Contribution: 2018-01-23 10:00
-
-Contribution: 2018-01-23 10:01
-
-Contribution: 2018-01-23 10:02
-
-Contribution: 2018-01-23 10:03
-
-Contribution: 2018-01-23 10:04
-
-Contribution: 2018-01-23 10:05
-
-Contribution: 2018-01-23 10:06
-
-Contribution: 2018-01-23 10:07
-
-Contribution: 2018-01-23 10:08
-
-Contribution: 2018-01-23 10:09
-
+* [Custom Domains](https://github.com/mhoofman/wordpress-heroku/wiki/Custom-Domains)
+* [Media Uploads](https://github.com/mhoofman/wordpress-heroku/wiki/Media-Uploads)
+* [Postgres Database Syncing](https://github.com/mhoofman/wordpress-heroku/wiki/Postgres-Database-Syncing)
+* [Setting Up a Local Environment on Linux (Apache)](https://github.com/mhoofman/wordpress-heroku/wiki/Setting-Up-a-Local-Environment-on-Linux-\(Apache\))
+* [Setting Up a Local Environment on Mac OS X](https://github.com/mhoofman/wordpress-heroku/wiki/Setting-Up-a-Local-Environment-on-Mac-OS-X)
+* [More...](https://github.com/mhoofman/wordpress-heroku/wiki)
